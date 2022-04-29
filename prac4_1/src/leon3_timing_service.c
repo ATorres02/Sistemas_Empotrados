@@ -73,7 +73,7 @@ void init_timing_service(uint32_t currentTime_in_Y2K){
 	//7) TODO:
 	//Instalar timertick_irq_handler como manejador de usuario de la interrupción del timer. Usar la macro TIMER_IRQ_LEVEL
 	//Install timertick_irq_handler as user handler of timer irq using TIMER_IRQ_LEVEL macro
-
+	leon3_install_user_hw_irq_handler(TIMER_IRQ_LEVEL,timertick_irq_handler);
 
 	//8) Inicializar el reloj monotónico
 	//Init monotonic clock
