@@ -29,7 +29,16 @@ rtems_task Init(
 );
 
 //User Task declarations 
-rtems_task Test_task(
+rtems_task TAvoidObstacles(
+  rtems_task_argument argument
+);
+rtems_task TPathTracking (
+  rtems_task_argument argument
+);
+rtems_task TSensorFusion(
+  rtems_task_argument argument
+);
+rtems_task TCalculatePath(
   rtems_task_argument argument
 );
 
@@ -104,6 +113,7 @@ extern rtems_name Task_name[ MAX_TASK_NUMBER ];       /* array of task names */
  *  static inline routine to make obtaining ticks per second easier.
  */
 
+
 static inline uint32_t get_ticks_per_second( void )
 {
   rtems_interval ticks_per_second;
@@ -173,6 +183,7 @@ rtems_task Init(rtems_task_argument argument)
   Task_name[ 1 ] = rtems_build_name( 'T', 'A', '1', ' ' );
   Task_name[ 2 ] = rtems_build_name( 'T', 'A', '2', ' ' );
   Task_name[ 3 ] = rtems_build_name( 'T', 'A', '3', ' ' );
+  Task_name[ 4 ] = rtems_build_name( 'T', 'A', '4', ' ' );
 
   status = rtems_task_create(
     Task_name[ 1 ], 1, RTEMS_MINIMUM_STACK_SIZE * 2, RTEMS_DEFAULT_MODES,
@@ -186,39 +197,111 @@ rtems_task Init(rtems_task_argument argument)
     Task_name[ 3 ], 1, RTEMS_MINIMUM_STACK_SIZE * 2, RTEMS_DEFAULT_MODES,
     RTEMS_DEFAULT_ATTRIBUTES, &Task_id[ 3 ]
   );
+  status = rtems_task_create(
+      Task_name[ 4 ], 1, RTEMS_MINIMUM_STACK_SIZE * 2, RTEMS_DEFAULT_MODES,
+      RTEMS_DEFAULT_ATTRIBUTES, &Task_id[ 4 ]
+    );
 
-  status = rtems_task_start( Task_id[ 1 ], Test_task, 1 );
-  status = rtems_task_start( Task_id[ 2 ], Test_task, 2 );
-  status = rtems_task_start( Task_id[ 3 ], Test_task, 3 );
+  status = rtems_task_start( Task_id[ 1 ], TAvoidObstacles, 1 );
+  status = rtems_task_start( Task_id[ 2 ], TPathTracking, 2 );
+  status = rtems_task_start( Task_id[ 3 ], TSensorFusion, 3 );
+  status = rtems_task_start( Task_id[ 4 ], TCalculatePath, 4 );
 
   status = rtems_task_delete( RTEMS_SELF );
 }
 
+rtems_status_code task_delay_until(rtems_interval ticks_from_boot){
+	rtems_interval current_time;
+	rtems_status_code status=0;
+	rtems_clock_get(RTEMS_CLOCK_GET_TICKS_SINCE_BOOT,&current_time);
+	if(ticks_from_boot>current_time){
+		status=rtems_task_wake_after(ticks_from_boot-current_time);
+	}
+	return status;
+}
 
-rtems_task Test_task(
-  rtems_task_argument unused
-)
-{
-  rtems_id          tid;
-  rtems_time_of_day time;
-  uint32_t  task_index;
-  rtems_status_code status;
+rtems_task TAvoidObstacles (rtems_task_argument unused) {
+	//TODO completar.
 
-  status = rtems_task_ident( RTEMS_SELF, RTEMS_SEARCH_ALL_NODES, &tid );
+	  rtems_id          tid;
+	  rtems_time_of_day time;
+	  uint32_t  task_index;
+	  rtems_status_code status;
+	  uint32_t	counter=1;
 
-  task_index = rtems_get_index(tid)-1;
-  for ( ; ; ) {
-    status = rtems_clock_get( RTEMS_CLOCK_GET_TOD, &time );
-    if ( time.second >= 3335 ) {
-      puts( "*** END OF CLOCK TICK TEST ***" );
-      exit( 0 );
-    }
+	  status = rtems_task_ident( RTEMS_SELF, RTEMS_SEARCH_ALL_NODES, &tid );
 
-    put_name( Task_name[ task_index ], FALSE );
-    print_time( " - rtems_clock_get - ", &time, "\n" );
+	  task_index = rtems_get_index(tid)-1;
+	  for ( ; ; ) {
 
-    printf(" - rtems_ticks_since_boot - %i\n", get_ticks_since_boot());
+	puts("T1 Do Avoid Obstacles");
+	printf(" - rtems_ticks_since_boot - %i\n\n",
+				get_ticks_since_boot());
+	status=task_delay_until(10*counter);
+	counter++;
+	  }
+}
+rtems_task TPathTracking (rtems_task_argument unused) {
+	//TODO completar.
 
-    status = rtems_task_wake_after( task_index * 5 * get_ticks_per_second() );
-  }
+	  rtems_id          tid;
+	  rtems_time_of_day time;
+	  uint32_t  task_index;
+	  rtems_status_code status;
+	  uint32_t	counter=1;
+
+	  status = rtems_task_ident( RTEMS_SELF, RTEMS_SEARCH_ALL_NODES, &tid );
+
+	  task_index = rtems_get_index(tid)-1;
+	  for ( ; ; ) {
+
+	puts("T2 Do PathTracking");
+	printf(" - rtems_ticks_since_boot - %i\n\n",
+				get_ticks_since_boot());
+	status=task_delay_until(15*counter);
+	counter++;
+
+	  }
+}
+rtems_task TSensorFusion (rtems_task_argument unused) {
+	//TODO completar.
+
+	  rtems_id          tid;
+	  rtems_time_of_day time;
+	  uint32_t  task_index;
+	  rtems_status_code status;
+	  uint32_t	counter=1;
+
+	  status = rtems_task_ident( RTEMS_SELF, RTEMS_SEARCH_ALL_NODES, &tid );
+
+	  task_index = rtems_get_index(tid)-1;
+	  for ( ; ; ) {
+
+	puts("T3 Do Sensor Fusion\n");
+	printf(" - rtems_ticks_since_boot - %i\n\n",
+				get_ticks_since_boot());
+	status=task_delay_until(30*counter);
+	counter++;
+
+	  }
+}
+rtems_task TCalculatePath (rtems_task_argument unused) {
+	//TODO completar.
+	  rtems_id          tid;
+	  rtems_time_of_day time;
+	  uint32_t  task_index;
+	  rtems_status_code status;
+	  uint32_t	counter=1;
+
+	  status = rtems_task_ident( RTEMS_SELF, RTEMS_SEARCH_ALL_NODES, &tid );
+
+	  task_index = rtems_get_index(tid)-1;
+	  for ( ; ; ) {
+
+	puts("T4 Do CalculatePath\n");
+	printf(" - rtems_ticks_since_boot - %i\n\n",
+				get_ticks_since_boot());
+	status=	task_delay_until(30*counter);
+	counter++;
+	  }
 }
